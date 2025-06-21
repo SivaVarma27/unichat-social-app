@@ -1,0 +1,47 @@
+import 'package:flutter/material.dart';
+import 'feed_screen.dart';
+import 'chat_screen.dart';
+import 'post_create_screen.dart';
+
+class HomeScreen extends StatefulWidget {
+  const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  int _currentIndex = 0;
+
+  final List<Widget> _pages = [
+    const FeedScreen(),
+    const ChatScreen(),
+  ];
+
+  void _onTabTapped(int index) {
+    setState(() => _currentIndex = index);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text("UNIchat")),
+      body: _pages[_currentIndex],
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _currentIndex,
+        onTap: _onTabTapped,
+        items: const [
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: "Feed"),
+          BottomNavigationBarItem(icon: Icon(Icons.chat), label: "Chat"),
+        ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.push(context,
+            MaterialPageRoute(builder: (_) => const PostCreateScreen()));
+        },
+        child: const Icon(Icons.add),
+      ),
+    );
+  }
+}
