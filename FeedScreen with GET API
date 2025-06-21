@@ -1,0 +1,59 @@
+import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+
+class FeedScreen extends StatefulWidget {
+  const FeedScreen({super.key});
+
+  @override
+  State<FeedScreen> createState() => _FeedScreenState();
+}
+
+class _FeedScreenState extends State<FeedScreen> {
+  List<dynamic> posts = [];
+  bool isLoading = true;
+
+  Future<void> fetchPosts() async {
+    final res = await http.get(
+      Uri.parse("http://<your_backend_url>/api/posts/feed"),
+    );
+
+    if (res.statusCode == 200) {
+      setState(() {
+        posts = jsonDecode(res.body);
+        isLoading = false;
+      });
+    } else {
+      setState(() => isLoading = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Failed to load feed")),
+      );
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    fetchPosts();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return isLoading
+        ? const Center(child: CircularProgressIndicator())
+        : ListView.builder(
+            itemCount: posts.length,
+            itemBuilder: (_, i) {
+              final post = posts[i];
+              return Card(
+                margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                child: ListTile(
+                  leading: CircleAvatar(child: Text(post['author']['username'][0].toUpperCase())),
+                  title: Text(post['author']['username']),
+                  subtitle: Text(post['content']),
+                ),
+              );
+            },
+          );
+  }
+}
