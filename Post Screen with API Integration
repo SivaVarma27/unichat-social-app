@@ -1,0 +1,92 @@
+import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
+
+class PostCreateScreen extends StatefulWidget {
+  const PostCreateScreen({super.key});
+
+  @override
+  State<PostCreateScreen> createState() => _PostCreateScreenState();
+}
+
+class _PostCreateScreenState extends State<PostCreateScreen> {
+  final contentController = TextEditingController();
+  bool isLoading = false;
+
+  Future<void> createPost() async {
+    if (contentController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Post content cannot be empty")),
+      );
+      return;
+    }
+
+    setState(() => isLoading = true);
+
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString("token");
+    if (token == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Please login again")),
+      );
+      return;
+    }
+
+    final response = await http.post(
+      Uri.parse("http://<your_backend_url>/api/posts/create"),
+      headers: {
+        "Content-Type": "application/json",
+        // If you later implement JWT middleware, add auth here
+        // "Authorization": "Bearer $token"
+      },
+      body: jsonEncode({
+        "author": "<your_test_user_id>", // Later this comes from token
+        "content": contentController.text.trim(),
+        "image": "" // placeholder for now
+      }),
+    );
+
+    if (response.statusCode == 201) {
+      Navigator.pop(context); // back to feed
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Post created successfully")),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Failed: ${response.body}")),
+      );
+    }
+
+    setState(() => isLoading = false);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text("Create Post")),
+      body: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          children: [
+            TextField(
+              controller: contentController,
+              maxLines: 5,
+              decoration: const InputDecoration(
+                hintText: "What's on your mind?",
+                border: OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: 20),
+            isLoading
+                ? const CircularProgressIndicator()
+                : ElevatedButton(
+                    onPressed: createPost,
+                    child: const Text("Post"),
+                  ),
+          ],
+        ),
+      ),
+    );
+  }
+}
