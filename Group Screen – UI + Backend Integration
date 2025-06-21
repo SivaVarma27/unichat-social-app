@@ -1,0 +1,106 @@
+import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+
+class GroupScreen extends StatefulWidget {
+  const GroupScreen({super.key});
+
+  @override
+  State<GroupScreen> createState() => _GroupScreenState();
+}
+
+class _GroupScreenState extends State<GroupScreen> {
+  List<dynamic> groups = [];
+  final nameCtrl = TextEditingController();
+  final descCtrl = TextEditingController();
+  bool isLoading = true;
+
+  Future<void> fetchGroups() async {
+    final res = await http.get(Uri.parse("http://<your_backend_url>/api/groups/list"));
+    if (res.statusCode == 200) {
+      setState(() {
+        groups = jsonDecode(res.body);
+        isLoading = false;
+      });
+    }
+  }
+
+  Future<void> createGroup() async {
+    final res = await http.post(
+      Uri.parse("http://<your_backend_url>/api/groups/create"),
+      headers: {"Content-Type": "application/json"},
+      body: jsonEncode({
+        "name": nameCtrl.text.trim(),
+        "description": descCtrl.text.trim(),
+      }),
+    );
+    if (res.statusCode == 201) {
+      nameCtrl.clear();
+      descCtrl.clear();
+      fetchGroups();
+    }
+  }
+
+  void showCreateGroupDialog() {
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text("Create Group"),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: nameCtrl,
+              decoration: const InputDecoration(labelText: "Group Name"),
+            ),
+            TextField(
+              controller: descCtrl,
+              decoration: const InputDecoration(labelText: "Description"),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              createGroup();
+            },
+            child: const Text("Create"),
+          )
+        ],
+      ),
+    );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    fetchGroups();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text("Groups")),
+      body: isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : RefreshIndicator(
+              onRefresh: fetchGroups,
+              child: ListView.builder(
+                itemCount: groups.length,
+                itemBuilder: (_, i) {
+                  final group = groups[i];
+                  return ListTile(
+                    title: Text(group['name']),
+                    subtitle: Text(group['description']),
+                  );
+                },
+              ),
+            ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: showCreateGroupDialog,
+        child: const Icon(Icons.group_add),
+      ),
+    );
+  }
+}
