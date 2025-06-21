@@ -1,0 +1,33 @@
+import 'package:flutter/material.dart';
+
+class FeedScreen extends StatelessWidget {
+  const FeedScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const Center(child: Text("Feed Coming Soon"));
+  }
+}
+import 'package:flutter/material.dart';
+
+class ChatScreen extends StatelessWidget {
+  const ChatScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const Center(child: Text("Chat Coming Soon"));
+  }
+}
+import 'package:flutter/material.dart';
+
+class PostCreateScreen extends StatelessWidget {
+  const PostCreateScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text("Create Post")),
+      body: const Center(child: Text("Post Form Coming Soon")),
+    );
+  }
+}
