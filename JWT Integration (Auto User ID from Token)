@@ -1,0 +1,18 @@
+dependencies:
+  jwt_decoder: ^2.0.1
+flutter pub get
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:jwt_decoder/jwt_decoder.dart';
+
+Future<String?> getUserIdFromToken() async {
+  final prefs = await SharedPreferences.getInstance();
+  final token = prefs.getString("token");
+  if (token == null) return null;
+
+  Map<String, dynamic> decodedToken = JwtDecoder.decode(token);
+  return decodedToken["id"]; // Depends on your backend token payload
+}
+
+final String userId = "<your_test_id>";
+final userId = await getUserIdFromToken();
+if (userId == null) return; // handle not-logged-in case
