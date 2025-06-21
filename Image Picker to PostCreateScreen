@@ -1,0 +1,24 @@
+  image_picker: ^1.1.0
+flutter pub get
+import 'dart:io';
+import 'package:image_picker/image_picker.dart';
+
+// add inside class:
+File? _selectedImage;
+
+Future<void> pickImage() async {
+  final pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery);
+  if (pickedFile != null) {
+    setState(() {
+      _selectedImage = File(pickedFile.path);
+    });
+  }
+}
+if (_selectedImage != null)
+  Image.file(_selectedImage!, height: 150),
+
+TextButton.icon(
+  onPressed: pickImage,
+  icon: const Icon(Icons.image),
+  label: const Text("Pick Image"),
+),
