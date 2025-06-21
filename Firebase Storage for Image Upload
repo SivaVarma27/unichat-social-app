@@ -1,0 +1,55 @@
+service firebase.storage {
+  match /b/{bucket}/o {
+    match /{allPaths=**} {
+      allow read, write: if true; // Dev only
+    }
+  }
+}
+
+
+dependencies:
+  firebase_core: ^2.24.2
+  firebase_storage: ^11.6.6
+
+flutter pub get
+
+import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'screens/login_screen.dart';
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
+  runApp(const UNIchatApp());
+}
+
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:path/path.dart';
+
+Future<String?> uploadImage(File imageFile) async {
+  try {
+    String fileName = basename(imageFile.path);
+    Reference ref = FirebaseStorage.instance.ref().child("posts/$fileName");
+    await ref.putFile(imageFile);
+    String downloadURL = await ref.getDownloadURL();
+    return downloadURL;
+  } catch (e) {
+    return null;
+  }
+}
+"image": ""
+
+String? imageUrl;
+if (_selectedImage != null) {
+  imageUrl = await uploadImage(_selectedImage!);
+}
+
+final response = await http.post(
+  Uri.parse("http://<backend>/api/posts/create"),
+  headers: {"Content-Type": "application/json"},
+  body: jsonEncode({
+    "author": userId,
+    "content": contentController.text.trim(),
+    "image": imageUrl ?? ""
+  }),
+);
