@@ -1,0 +1,33 @@
+drawer: Drawer(
+  child: ListView(
+    padding: EdgeInsets.zero,
+    children: [
+      const DrawerHeader(
+        decoration: BoxDecoration(color: Colors.blue),
+        child: Text("UNIchat Menu", style: TextStyle(color: Colors.white, fontSize: 24)),
+      ),
+      ListTile(
+        leading: const Icon(Icons.person),
+        title: const Text("Profile"),
+        onTap: () => Navigator.pushNamed(context, '/profile'),
+      ),
+      ListTile(
+        leading: const Icon(Icons.group),
+        title: const Text("Groups"),
+        onTap: () => Navigator.pushNamed(context, '/groups'),
+      ),
+      ListTile(
+        leading: const Icon(Icons.visibility_off),
+        title: const Text("Anonymous Zone"),
+        onTap: () => Navigator.pushNamed(context, '/anon'),
+      ),
+      ListTile(
+        leading: const Icon(Icons.logout),
+        title: const Text("Logout"),
+        onTap: () {
+          // Clear token and redirect to login
+        },
+      ),
+    ],
+  ),
+),
