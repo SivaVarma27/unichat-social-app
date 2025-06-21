@@ -1,0 +1,12 @@
+TextButton(
+  onPressed: () {
+    Navigator.push(context, MaterialPageRoute(builder: (_) => SignupScreen()));
+  },
+  child: Text("Don't have an account? Sign up"),
+),
+TextButton(
+  onPressed: () {
+    Navigator.pop(context); // Back to login
+  },
+  child: Text("Already have an account? Log in"),
+),
