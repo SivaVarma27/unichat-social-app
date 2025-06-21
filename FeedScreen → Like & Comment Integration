@@ -1,0 +1,132 @@
+Backend URLs used:
+POST /api/posts/like/:postId
+
+POST /api/posts/comment/:postId
+
+
+import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+
+class FeedScreen extends StatefulWidget {
+  const FeedScreen({super.key});
+
+  @override
+  State<FeedScreen> createState() => _FeedScreenState();
+}
+
+class _FeedScreenState extends State<FeedScreen> {
+  List<dynamic> posts = [];
+  bool isLoading = true;
+
+  Future<void> fetchPosts() async {
+    final res = await http.get(Uri.parse("http://<your_backend_url>/api/posts/feed"));
+    if (res.statusCode == 200) {
+      setState(() {
+        posts = jsonDecode(res.body);
+        isLoading = false;
+      });
+    } else {
+      setState(() => isLoading = false);
+    }
+  }
+
+  Future<void> likePost(String postId, String userId) async {
+    final res = await http.post(
+      Uri.parse("http://<your_backend_url>/api/posts/like/$postId"),
+      headers: {"Content-Type": "application/json"},
+      body: jsonEncode({"userId": userId}),
+    );
+    if (res.statusCode == 200) {
+      fetchPosts(); // reload feed
+    }
+  }
+
+  Future<void> addComment(String postId, String userId, String commentText) async {
+    final res = await http.post(
+      Uri.parse("http://<your_backend_url>/api/posts/comment/$postId"),
+      headers: {"Content-Type": "application/json"},
+      body: jsonEncode({"userId": userId, "text": commentText}),
+    );
+    if (res.statusCode == 200) {
+      fetchPosts(); // refresh
+    }
+  }
+
+  void showCommentDialog(String postId, String userId) {
+    final commentCtrl = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text("Add Comment"),
+        content: TextField(
+          controller: commentCtrl,
+          decoration: const InputDecoration(hintText: "Enter comment"),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              addComment(postId, userId, commentCtrl.text);
+            },
+            child: const Text("Post"),
+          )
+        ],
+      ),
+    );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    fetchPosts();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    const userId = "<your_test_user_id>"; // change later to dynamic user
+    return isLoading
+        ? const Center(child: CircularProgressIndicator())
+        : RefreshIndicator(
+            onRefresh: fetchPosts,
+            child: ListView.builder(
+              itemCount: posts.length,
+              itemBuilder: (_, i) {
+                final post = posts[i];
+                final isLiked = post['likes'].contains(userId);
+                return Card(
+                  margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  child: ListTile(
+                    title: Text(post['author']['username']),
+                    subtitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(post['content']),
+                        const SizedBox(height: 8),
+                        Row(
+                          children: [
+                            IconButton(
+                              icon: Icon(
+                                isLiked ? Icons.favorite : Icons.favorite_border,
+                                color: isLiked ? Colors.red : Colors.grey,
+                              ),
+                              onPressed: () => likePost(post['_id'], userId),
+                            ),
+                            Text("${post['likes'].length}"),
+                            const SizedBox(width: 16),
+                            IconButton(
+                              icon: const Icon(Icons.comment),
+                              onPressed: () => showCommentDialog(post['_id'], userId),
+                            ),
+                            Text("${post['comments'].length}"),
+                          ],
+                        )
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
+          );
+  }
+}
