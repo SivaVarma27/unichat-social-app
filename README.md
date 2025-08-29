@@ -1,6 +1,6 @@
-# UNIchat 💬 – Secure Social Messaging App
+# UNIze 💬 – Secure Social Messaging App
 
-UNIchat is a complete Flutter + Node.js powered social messaging app. It includes feed, chat, anonymous posts, groups, profile and Firebase integration. Fully secure with JWT auth.
+UNIze is a complete Flutter + Node.js powered social messaging app. It includes feed, chat, anonymous posts, groups, profile and Firebase integration. Fully secure with JWT auth.
 
 ---
 
